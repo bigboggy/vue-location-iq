@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-for="(place, index) of places" :key="index" :class="{ selected: isSelected(index) }">
+    <li v-for="(place, index) of places" :key="index" :class="{ selected: isSelected(index) }" @click="emit('select', index)">
       <strong>{{ place.address?.name }}</strong>
       <p>
         {{ place.address ? formatAddress(place.address) : '' }}
@@ -13,7 +13,7 @@
 import { formatAddress } from '../helpers/addressHelper.js'
 
 const props = defineProps(['places', 'selectedPlaceIndex'])
-
+const emit = defineEmits(['select'])
 const isSelected = (index) => {
   return props.selectedPlaceIndex === index
 }
@@ -35,6 +35,11 @@ const isSelected = (index) => {
   font-size: 16px;
   border-bottom: 1px solid #e2e8f0;
   list-style-type: none;
+}
+
+.search-field__auto-suggest li:hover {
+  background-color: #f7fafc;
+  cursor: pointer;
 }
 
 .search-field__auto-suggest li.selected {

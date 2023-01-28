@@ -4,7 +4,7 @@ import { useDebouncedRef } from '../composables/useDebounceRef'
 import { useGeoAutoCompleteApi } from '../composables/useGeoAutoCompleteInput'
 import { Place } from '../interfaces/Place'
 import Dropdown from './Dropdown.vue'
-import { useAutocomplete } from '../composables/useAutocomplete'
+import { useKeyboard } from '../composables/useKeyboard'
 import SelectedPlaces from './SelectedPlaces.vue'
 import SearchField from './SearchField.vue'
 import ErrorMessage from './ErrorMessage.vue'
@@ -37,12 +37,33 @@ const inputValue = computed({
   },
 })
 
-const autoComplete = useAutocomplete(places, selectedPlaceIndex, selectedPlaces, inputValue)
+const handleSearchReset = () => {
+  selectedPlaceIndex.value = null
+  inputValue.value = ''
+  places.value = null
+}
 
-window.addEventListener('keydown', autoComplete.onKeyDown)
+const isPlaceDuplicate = () => {
+  const place: Place = places.value[selectedPlaceIndex.value]
+  const placeInSelection: boolean = selectedPlaces.value.some(
+    (selectedPlace) => selectedPlace.place_id === place.place_id
+  )
+  return placeInSelection
+}
 
-// debounce ref used for delayed input, to prevent excessive API calls
-const debouncedInputValue = useDebouncedRef(null)
+const handlePlaceSelect = (index) => {
+  if (isPlaceDuplicate()) {
+    return
+  }
+
+  selectedPlaces.value.push(places.value[index])
+
+  handleSearchReset()
+}
+
+const keyboard = useKeyboard(places, selectedPlaceIndex, selectedPlaces, handleSearchReset, handlePlaceSelect)
+
+window.addEventListener('keydown', keyboard.onKeyDown)
 
 const error: Ref<string> = ref('')
 
@@ -54,6 +75,9 @@ const handlePlacesResponse = () => {
     error.value = ''
   }
 }
+
+// debounce ref used for delayed input, to prevent excessive API calls
+const debouncedInputValue = useDebouncedRef(null)
 
 watch(debouncedInputValue, async (value) => {
   places.value = await autoCompleteApi.getGeoAutoComplete(value)
@@ -85,6 +109,7 @@ const handleChange = (event) => emit('change', event)
       :class="dropDownClass ? dropDownClass : 'search-field__auto-suggest'"
       :places="places"
       :selectedPlaceIndex="selectedPlaceIndex"
+      @select="handlePlaceSelect($event)"
     />
     <SelectedPlaces
       v-if="selectedPlaces.length"
