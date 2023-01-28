@@ -1,4 +1,4 @@
-export const useKeyboard = (places, selectedPlaceIndex, selectedPlaces, handleSearchReset, handlePlaceSelect) => {
+export const useKeyboard = (places, selectedPlaceIndex, handleSearchReset, handlePlaceSelect) => {
   /**
    * Handles key events
    * @param event

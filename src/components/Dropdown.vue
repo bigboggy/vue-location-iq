@@ -35,6 +35,7 @@ const isSelected = (index) => {
   font-size: 16px;
   border-bottom: 1px solid #e2e8f0;
   list-style-type: none;
+  transition: all 0.2s ease;
 }
 
 .search-field__auto-suggest li:hover {

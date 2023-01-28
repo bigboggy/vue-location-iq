@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, Ref, ref, watch } from 'vue'
+import { computed, PropType, Ref, ref, watch } from 'vue'
 import { useDebouncedRef } from '../composables/useDebounceRef'
 import { useGeoAutoCompleteApi } from '../composables/useGeoAutoCompleteInput'
 import { Place } from '../interfaces/Place'
@@ -10,24 +10,34 @@ import SearchField from './SearchField.vue'
 import ErrorMessage from './ErrorMessage.vue'
 import SearchFieldWrapper from './SearchFieldWrapper.vue'
 
-const props = defineProps([
-  'modelValue',
-  'apiKey',
-  'existingLocations',
-  'placeholder',
-  'searchFieldClass',
-  'dropDownClass',
-  'selectedElementsClass',
-])
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: '',
+    required: false,
+  },
+  apiKey: {
+    type: String,
+    required: true,
+  },
+  existingLocations: Array as PropType<Place[]>,
+  placeholder: {
+    type: String,
+    default: 'Search for a location',
+  },
+  searchFieldClass: String,
+  dropDownClass: String,
+  selectedElementsClass: String,
+})
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const autoCompleteApi = useGeoAutoCompleteApi(props.apiKey)
 const places: Ref<Place[] | string> = ref(null)
 const selectedPlaceIndex: Ref<number> = ref(0)
-const selectedPlaces: Ref<Place[]> = ref(props.existingLocations || [])
+const selectedPlaces = ref(props.existingLocations || [])
 
-// allowing to bind with v-model to the input from parent
+// Input handling
 const inputValue = computed({
   get() {
     return props.modelValue
@@ -37,6 +47,14 @@ const inputValue = computed({
   },
 })
 
+const handleInput = (event) => {
+  inputValue.value = event.target.value
+  debouncedInputValue.value = event.target.value
+}
+
+const handleChange = (event) => emit('change', event)
+
+// Event handling
 const handleSearchReset = () => {
   selectedPlaceIndex.value = null
   inputValue.value = ''
@@ -44,9 +62,9 @@ const handleSearchReset = () => {
 }
 
 const isPlaceDuplicate = () => {
-  const place: Place = places.value[selectedPlaceIndex.value]
+  const currentPlace: Place = places.value[selectedPlaceIndex.value]
   const placeInSelection: boolean = selectedPlaces.value.some(
-    (selectedPlace) => selectedPlace.place_id === place.place_id
+    (selectedPlace) => selectedPlace.place_id === currentPlace.place_id
   )
   return placeInSelection
 }
@@ -61,10 +79,11 @@ const handlePlaceSelect = (index) => {
   handleSearchReset()
 }
 
-const keyboard = useKeyboard(places, selectedPlaceIndex, selectedPlaces, handleSearchReset, handlePlaceSelect)
+const keyboard = useKeyboard(places, selectedPlaceIndex, handleSearchReset, handlePlaceSelect)
 
 window.addEventListener('keydown', keyboard.onKeyDown)
 
+// Error handling
 const error: Ref<string> = ref('')
 
 const handlePlacesResponse = () => {
@@ -83,13 +102,6 @@ watch(debouncedInputValue, async (value) => {
   places.value = await autoCompleteApi.getGeoAutoComplete(value)
   handlePlacesResponse()
 })
-
-const handleInput = (event) => {
-  inputValue.value = event.target.value
-  debouncedInputValue.value = event.target.value
-}
-
-const handleChange = (event) => emit('change', event)
 </script>
 
 <template>

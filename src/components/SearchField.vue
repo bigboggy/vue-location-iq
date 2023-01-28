@@ -4,7 +4,7 @@
     type="text"
     :class="[{ 'has-error': error }]"
     :value="inputValue"
-    :placeholder="placeholder || 'Search your address'"
+    :placeholder="placeholder"
     @keydown.down="handleListFocus"
   />
 </template>
@@ -30,6 +30,7 @@ const handleListFocus = () => {
   padding: 0.625rem;
   box-sizing: border-box;
   font-size: 18px;
+  transition: all 0.2s ease;
 }
 
 .search-field__input:focus {
