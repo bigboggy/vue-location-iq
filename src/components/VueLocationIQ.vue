@@ -88,8 +88,8 @@ const error: Ref<string> = ref('')
 
 const handlePlacesResponse = async (value) => {
 
-  if (inputValue.value === '' && selectedPlaces.value.length < 3) {
-    return
+  if (inputValue.value === '' || value.length < 3) {
+    return false
   }
 
   try {
