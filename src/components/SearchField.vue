@@ -1,0 +1,43 @@
+<template>
+  <input
+    ref="searchField"
+    type="text"
+    :class="[{ 'has-error': error }]"
+    :value="inputValue"
+    :placeholder="placeholder || 'Search your address'"
+    @keydown.down="handleListFocus"
+  />
+</template>
+
+<script setup>
+import { ref } from 'vue'
+const props = defineProps(['inputValue', 'places', 'placeholder', 'error'])
+const searchField = ref()
+const handleListFocus = () => {
+  if (props.places.value) searchField.value.blur()
+}
+</script>
+
+<style scoped>
+.search-field__input {
+  background-color: #f7fafc;
+  border: 1px solid #edf2f7;
+  color: #2d3748;
+  border-radius: 0.25rem;
+  outline: none;
+  display: block;
+  width: 100%;
+  padding: 0.625rem;
+  box-sizing: border-box;
+  font-size: 18px;
+}
+
+.search-field__input:focus {
+  border-color: #4299e1;
+}
+
+.search-field__input.has-error {
+  border: 1px solid #e02424;
+  color: #e02424;
+}
+</style>

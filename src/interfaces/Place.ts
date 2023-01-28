@@ -16,4 +16,5 @@ export interface Place {
     country: string
     country_code: string
   }
+  selected: boolean
 }
