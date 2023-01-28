@@ -75,8 +75,6 @@ const search = ref("");
         v-model="search"
     />
 </template>
-
-</script>
 ```
 
 ## Dev Setup
