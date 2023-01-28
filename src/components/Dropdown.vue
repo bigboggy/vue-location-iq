@@ -27,6 +27,8 @@ const isSelected = (index) => {
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
   padding: 0;
+  position: absolute;
+  width: 100%;
 }
 
 .search-field__auto-suggest li {

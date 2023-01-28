@@ -11,7 +11,7 @@ export const useGeoAutoCompleteApi = (apiKey: string, limit: number = 5) => {
     try {
       return await api.get(`?key=${apiKey}&q=${query}&limit=${limit}`)
     } catch (e) {
-      return e
+      throw new Error(e)
     }
   }
 

@@ -86,21 +86,27 @@ window.addEventListener('keydown', keyboard.onKeyDown)
 // Error handling
 const error: Ref<string> = ref('')
 
-const handlePlacesResponse = () => {
-  if (!places.value.length) {
-    error.value = places.value.toString()
-  } else {
-    selectedPlaceIndex.value = 0
+const handlePlacesResponse = async (value) => {
+
+  if (inputValue.value === '' && selectedPlaces.value.length < 3) {
+    return
+  }
+
+  try {
+    places.value = await autoCompleteApi.getGeoAutoComplete(value)
     error.value = ''
+    selectedPlaceIndex.value = 0
+  } catch (e) {
+    error.value = e.message
+    selectedPlaceIndex.value = 0
   }
 }
 
 // debounce ref used for delayed input, to prevent excessive API calls
 const debouncedInputValue = useDebouncedRef(null)
 
-watch(debouncedInputValue, async (value) => {
-  places.value = await autoCompleteApi.getGeoAutoComplete(value)
-  handlePlacesResponse()
+watch(debouncedInputValue,(value) => {
+  handlePlacesResponse(value)
 })
 </script>
 
@@ -117,7 +123,7 @@ watch(debouncedInputValue, async (value) => {
     />
     <ErrorMessage v-if="error" :error="error" />
     <Dropdown
-      v-if="inputValue && places?.length"
+      v-if="inputValue && places?.length && !error"
       :class="dropDownClass ? dropDownClass : 'search-field__auto-suggest'"
       :places="places"
       :selectedPlaceIndex="selectedPlaceIndex"
