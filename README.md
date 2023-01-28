@@ -34,61 +34,60 @@ First, install the `VueLocationIQ` component.
 ```bash
 npm i vue-location-iq
 ```
-
+OR
+```bash
+yarn add vue-location-iq
+```
 Then, import it into your project.
 
 ```js
-import VueLocationIQ from 'vue-location-iq'
+import { VueLocationIQ } from "vue-location-iq";
 ```
 
 Finally, add the component to your template.
 
 ```html
 <VueLocationIQ
-  apiKey="<YOUR_API_KEY>"
-  :existingLocations="existingLocations"
+  api-key="<YOUR_API_KEY>"
+  :existing-locations="existingLocations"
   :placeholder="placeholder"
-  searchFieldClass="search-field__input"
-  dropDownClass="search-field__auto-suggest"
-  selectedElementsClass="selected-elements"
+  search-field-class="search-field__input"
+  drop-down-class="search-field__auto-suggest"
+  selected-elements-class="selected-elements"
   v-model="<YOUR_REF>"
+  @change="handleChange"
 />
 ```
 
 ## Example
 
 ```html
+<script setup>
+import { VueLocationIQ } from "vue-location-iq";
+import "vue-location-iq/dist/style.css";
+import { ref } from "vue";
+
+const search = ref("");
+</script>
 <template>
-  <VueLocationIQ
-    apiKey="<YOUR_API_KEY>"
-    :existingLocations="existingLocations"
-    :placeholder="placeholder"
-    searchFieldClass="search-field__input"
-    dropDownClass="search-field__auto-suggest"
-    selectedElementsClass="selected-elements"
-    v-model="searchField"
-  />
+    <VueLocationIQ
+        api-key="<YOUR_API_KEY>"
+        v-model="search"
+    />
 </template>
 
-<script>
-import VueLocationIQ from 'vue-location-iq'
-
-export default {
-  components: {
-    VueLocationIQ,
-  },
-  data() {
-    return {
-      existingLocations: [],
-      searchField: '',
-      placeholder: 'Search for a location',
-    }
-  },
-  methods: {
-    handleChange(value) {
-      // Handle the change event
-    },
-  },
-}
 </script>
+```
+
+## Dev Setup
+
+```bash
+yarn install
+```
+`
+copy .env.example to .env and provide the key
+`
+
+```bash
+yarn dev
 ```

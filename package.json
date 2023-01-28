@@ -1,15 +1,22 @@
 {
   "name": "vue-location-iq",
-  "files": ["dist"],
+  "files": [
+    "dist/*.css",
+    "dist/*.js"
+  ],
   "main": "./dist/vue-location-iq.umd.js",
   "module": "./dist/vue-location-iq.es.js",
   "exports": {
     ".": {
-      "import": "./dist/my-lib.es.js",
-      "require": "./dist/my-lib.umd.js"
+      "import": "./dist/vue-location-iq.es.js",
+      "require": "./dist/vue-location-iq.umd.js"
+    },
+    "./dist/style.css": {
+      "import": "./dist/style.css",
+      "require": "./dist/style.css"
     }
   },
-  "version": "0.0.2",
+  "version": "0.0.51",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
