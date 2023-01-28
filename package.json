@@ -6,6 +6,7 @@
   ],
   "main": "./dist/vue-location-iq.umd.js",
   "module": "./dist/vue-location-iq.es.js",
+  "type": "module",
   "exports": {
     ".": {
       "import": "./dist/vue-location-iq.es.js",
@@ -16,7 +17,7 @@
       "require": "./dist/style.css"
     }
   },
-  "version": "0.0.51",
+  "version": "0.0.52",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
