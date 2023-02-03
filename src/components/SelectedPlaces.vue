@@ -13,23 +13,23 @@ defineProps(['selectedPlaces'])
 </script>
 
 <style scoped>
-.selected-elements {
+.selected-places {
   margin-top: 15px;
-  background-color: #FFFFFF;
-  border: 1px solid #EDF2F7;
+  background-color: #ffffff;
+  border: 1px solid #edf2f7;
   border-radius: 0.375rem;
   padding: 0;
 }
 
-.selected-elements li {
-  color: #2D3748;
+.selected-places li {
+  color: #2d3748;
   padding: 15px;
   font-size: 16px;
   border-bottom: 1px solid #e2e8f0;
   list-style-type: none;
 }
 
-.selected-elements p {
+.selected-places p {
   padding: 10px 0 0 0;
   margin: 0;
 }

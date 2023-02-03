@@ -1,7 +1,7 @@
 export const useApi = () => {
   const baseUrl = 'https://api.locationiq.com/v1/autocomplete.php'
 
-  const get = async (request: RequestInfo) => {
+  const httpGet = async (request: RequestInfo) => {
     const response = await fetch(`${baseUrl}${request}`)
 
     if (!response.ok) {
@@ -12,6 +12,6 @@ export const useApi = () => {
   }
 
   return {
-    get,
+    httpGet,
   }
 }

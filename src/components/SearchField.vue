@@ -3,7 +3,7 @@
     ref="searchField"
     type="text"
     :class="[{ 'has-error': error }]"
-    :value="inputValue"
+    :value="searchQuery"
     :placeholder="placeholder"
     @keydown.down="handleListFocus"
   />
@@ -11,10 +11,10 @@
 
 <script setup>
 import { ref } from 'vue'
-const props = defineProps(['inputValue', 'places', 'placeholder', 'error'])
+const props = defineProps(['searchQuery', 'hasPlaces', 'placeholder', 'error'])
 const searchField = ref()
 const handleListFocus = () => {
-  if (props.places.value) searchField.value.blur()
+  if (props.hasPlaces) searchField.value.blur()
 }
 </script>
 

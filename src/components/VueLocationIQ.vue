@@ -1,14 +1,17 @@
 <script lang="ts" setup>
-import { computed, PropType, Ref, ref, watch } from 'vue'
+import { computed, onMounted, PropType, watch } from 'vue'
 import { useDebouncedRef } from '../composables/useDebounceRef'
-import { useGeoAutoCompleteApi } from '../composables/useGeoAutoCompleteInput'
+import { useGeoAutoCompleteApi } from '../composables/useGeoAutoCompleteApi'
 import { Place } from '../interfaces/Place'
 import Dropdown from './Dropdown.vue'
-import { useKeyboard } from '../composables/useKeyboard'
 import SelectedPlaces from './SelectedPlaces.vue'
 import SearchField from './SearchField.vue'
 import ErrorMessage from './ErrorMessage.vue'
 import SearchFieldWrapper from './SearchFieldWrapper.vue'
+import { useSelectedPlacesStore } from '../stores/selectedPlaces'
+import { placeSuggestionStore } from '../stores/placeSuggestions'
+import { useErrorStore } from '../stores/error'
+import { usePlaces } from '../composables/usePlaces'
 
 const props = defineProps({
   modelValue: {
@@ -20,25 +23,62 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  existingLocations: Array as PropType<Place[]>,
+  existingLocations: {
+    type: Array as PropType<Place[]>,
+    default: () => [],
+    required: false,
+  },
   placeholder: {
     type: String,
     default: 'Search for a location',
   },
-  searchFieldClass: String,
-  dropDownClass: String,
-  selectedElementsClass: String,
+  searchFieldClass: {
+    type: String,
+    default: 'search-field__input',
+  },
+  dropDownClass: {
+    type: String,
+    default: 'search-field__auto-suggest',
+  },
+  selectedElementsClass: {
+    type: String,
+    default: 'selected-places',
+  },
+  hideSelectedPlaces: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits(['update:modelValue', 'change', 'selectedPlacesUpdated'])
 
+const selectedPlaces = useSelectedPlacesStore()
+const error = useErrorStore()
 const autoCompleteApi = useGeoAutoCompleteApi(props.apiKey)
-const places: Ref<Place[] | string> = ref(null)
-const selectedPlaceIndex: Ref<number> = ref(0)
-const selectedPlaces = ref(props.existingLocations || [])
+const placeSuggestions = placeSuggestionStore()
+const places = usePlaces(autoCompleteApi, placeSuggestions, error)
 
-// Input handling
-const inputValue = computed({
+// debounce ref used for delayed input, to prevent excessive API calls
+const debouncedInputValue = useDebouncedRef(null)
+
+// Setting initial value
+onMounted(() => {
+  selectedPlaces.setItems(props.existingLocations)
+})
+
+// watch for changes in the search query, handle the API call and clear selection
+watch(debouncedInputValue, (value) => {
+  places.handlePlacesResponse(value)
+  placeSuggestions.clearSelectedIndex()
+})
+
+// Send updates to parent, if new places are selected
+watch(selectedPlaces.getItems(), (value) => {
+  emit('selectedPlacesUpdated', value)
+})
+
+// Handles 2 way binding for the search field
+const searchQuery = computed({
   get() {
     return props.modelValue
   },
@@ -47,92 +87,80 @@ const inputValue = computed({
   },
 })
 
+// Computed properties
+const canShowDropdown = computed(() => {
+  return searchQuery.value.length > 0 && placeSuggestions.hasItems() && !error.hasErrorMessage()
+})
+
+const canShowSelectedPlaces = computed(() => {
+  return !props.hideSelectedPlaces && selectedPlaces.hasItems()
+})
+
+/**
+ * Handle change event, if search query input changes value
+ * @param event
+ */
+const handleChange = (event) => emit('change', event)
+
+/**
+ * Realtime update for the search query, if bound by v-model & update debounced value
+ * @param event
+ */
 const handleInput = (event) => {
-  inputValue.value = event.target.value
+  searchQuery.value = event.target.value
   debouncedInputValue.value = event.target.value
 }
 
-const handleChange = (event) => emit('change', event)
-
-// Event handling
+// Clear the search input field and reset the index
 const handleSearchReset = () => {
-  selectedPlaceIndex.value = null
-  inputValue.value = ''
-  places.value = null
+  placeSuggestions.clearSelectedIndex()
+  searchQuery.value = ''
+  placeSuggestions.clearItems()
 }
 
-const isPlaceDuplicate = () => {
-  const currentPlace: Place = places.value[selectedPlaceIndex.value]
-  const placeInSelection: boolean = selectedPlaces.value.some(
-    (selectedPlace) => selectedPlace.place_id === currentPlace.place_id
-  )
-  return placeInSelection
+// Move up the dropdown list
+const handleArrowUp = () => {
+  placeSuggestions.decrementSelectedIndex()
 }
 
-const handlePlaceSelect = (index) => {
-  if (isPlaceDuplicate()) {
-    return
-  }
+// Move down the dropdown list
+const handleArrowDown = () => {
+  placeSuggestions.incrementSelectedIndex()
+}
 
-  selectedPlaces.value.push(places.value[index])
-
+// Select a place from the dropdown by index
+const handleEnter = () => {
+  const selectedPlace = placeSuggestions.getItemByIndex()
+  places.handlePlaceSelect(selectedPlace, selectedPlaces)
   handleSearchReset()
 }
-
-const keyboard = useKeyboard(places, selectedPlaceIndex, handleSearchReset, handlePlaceSelect)
-
-window.addEventListener('keydown', keyboard.onKeyDown)
-
-// Error handling
-const error: Ref<string> = ref('')
-
-const handlePlacesResponse = async (value) => {
-
-  if (inputValue.value === '' || value.length < 3) {
-    return false
-  }
-
-  try {
-    places.value = await autoCompleteApi.getGeoAutoComplete(value)
-    error.value = ''
-    selectedPlaceIndex.value = 0
-  } catch (e) {
-    error.value = e.message
-    selectedPlaceIndex.value = 0
-  }
-}
-
-// debounce ref used for delayed input, to prevent excessive API calls
-const debouncedInputValue = useDebouncedRef(null)
-
-watch(debouncedInputValue,(value) => {
-  handlePlacesResponse(value)
-})
 </script>
 
 <template>
   <SearchFieldWrapper>
     <SearchField
-      :class="searchFieldClass ? searchFieldClass : 'search-field__input'"
-      :input-value="inputValue"
+      :class="searchFieldClass"
+      :search-query="searchQuery"
       :placeholder="placeholder"
-      :error="error"
-      :places="places"
+      :error="error.hasErrorMessage()"
+      :has-places="placeSuggestions.hasItems()"
       @input="handleInput"
       @change="handleChange"
     />
-    <ErrorMessage v-if="error" :error="error" />
+    <ErrorMessage v-if="error.hasErrorMessage()" :error="error.getError()" />
     <Dropdown
-      v-if="inputValue && places?.length && !error"
-      :class="dropDownClass ? dropDownClass : 'search-field__auto-suggest'"
-      :places="places"
-      :selectedPlaceIndex="selectedPlaceIndex"
-      @select="handlePlaceSelect($event)"
+      v-if="canShowDropdown"
+      :class="dropDownClass"
+      :places="placeSuggestions.getItems()"
+      :selectedPlaceIndex="placeSuggestions.getSelectedIndex()"
+      @arrow-down="handleArrowDown"
+      @arrow-up="handleArrowUp"
+      @enter="handleEnter"
     />
     <SelectedPlaces
-      v-if="selectedPlaces.length"
-      :class="selectedElementsClass ? selectedElementsClass : 'selected-elements'"
-      :selected-places="selectedPlaces"
+      v-if="canShowSelectedPlaces"
+      :class="selectedElementsClass"
+      :selected-places="selectedPlaces.getItems()"
     />
   </SearchFieldWrapper>
 </template>
