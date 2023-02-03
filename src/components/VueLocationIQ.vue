@@ -72,11 +72,6 @@ watch(debouncedInputValue, (value) => {
   placeSuggestions.clearSelectedIndex()
 })
 
-// Send updates to parent, if new places are selected
-watch(selectedPlaces.getItems(), (value) => {
-  emit('selectedPlacesUpdated', value)
-})
-
 // Handles 2 way binding for the search field
 const searchQuery = computed({
   get() {
@@ -132,6 +127,7 @@ const handleArrowDown = () => {
 const handleEnter = () => {
   const selectedPlace = placeSuggestions.getItemByIndex()
   places.handlePlaceSelect(selectedPlace, selectedPlaces)
+  emit('selectedPlacesUpdated', selectedPlaces.getItems())
   handleSearchReset()
 }
 </script>
