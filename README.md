@@ -29,6 +29,7 @@ VueLocationIQ is a Vue component that enables users to search for locations and 
 
 - `update:modelValue`: Triggered when the model value has been updated.
 - `change`: Triggered when the input value has been changed.
+- `selectedPlacesUpdated`: Returns the updates places in an array.
 
 ## Usage
 
