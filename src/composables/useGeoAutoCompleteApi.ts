@@ -9,7 +9,7 @@ export const useGeoAutoCompleteApi = (apiKey: string, limit: number = 5) => {
    */
   const getGeoAutoComplete: (query: string) => Promise<Place[] | string> = async (query: string) => {
     try {
-      return await api.get(`?key=${apiKey}&q=${query}&limit=${limit}`)
+      return await api.httpGet(`?key=${apiKey}&q=${query}&limit=${limit}`)
     } catch (e) {
       throw new Error(e)
     }

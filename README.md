@@ -2,6 +2,8 @@
 
 VueLocationIQ is a Vue component that enables users to search for locations and adds them to a list of existing places. The component uses the LocationIQ API to provide users with a list of autocomplete suggestions as they type.
 
+## GitHub
+[Link to GitHub repository](https://github.com/bigboggy/vue-location-iq)
 ## Features
 
 - Uses the LocationIQ API to provide autocomplete suggestions.
@@ -21,6 +23,7 @@ VueLocationIQ is a Vue component that enables users to search for locations and 
 - `searchFieldClass`: The class for the SearchField component. (type: `String`)
 - `dropDownClass`: The class for the Dropdown component. (type: `String`)
 - `selectedElementsClass`: The class for the SelectedPlaces component. (type: `String`)
+- `hideSelectedPlaces`: Hides the selected places list, if not needed. (type: `boolean`)
 
 ## Events
 
