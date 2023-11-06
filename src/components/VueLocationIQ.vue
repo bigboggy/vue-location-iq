@@ -53,10 +53,13 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'change', 'selectedPlacesUpdated'])
 
 const selectedPlaces = useSelectedPlacesStore()
-const error = useErrorStore()
+const errorStore = useErrorStore()
 const autoCompleteApi = useGeoAutoCompleteApi(props.apiKey)
-const placeSuggestions = placeSuggestionStore()
-const places = usePlaces(autoCompleteApi, placeSuggestions, error)
+
+// Simple store for the place suggestions, no need for pinia here
+const placeStore = placeSuggestionStore()
+
+const places = usePlaces(autoCompleteApi, placeStore, errorStore)
 
 // debounce ref used for delayed input, to prevent excessive API calls
 const debouncedInputValue = useDebouncedRef(null)
@@ -69,7 +72,7 @@ onMounted(() => {
 // watch for changes in the search query, handle the API call and clear selection
 watch(debouncedInputValue, (value) => {
   places.handlePlacesResponse(value)
-  placeSuggestions.clearSelectedIndex()
+  placeStore.clearSelectedIndex()
 })
 
 // Handles 2 way binding for the search field
@@ -84,7 +87,7 @@ const searchQuery = computed({
 
 // Computed properties
 const canShowDropdown = computed(() => {
-  return searchQuery.value.length > 0 && placeSuggestions.hasItems() && !error.hasErrorMessage()
+  return searchQuery.value.length > 0 && placeStore.hasItems() && !errorStore.hasErrorMessage()
 })
 
 const canShowSelectedPlaces = computed(() => {
@@ -108,24 +111,24 @@ const handleInput = (event) => {
 
 // Clear the search input field and reset the index
 const handleSearchReset = () => {
-  placeSuggestions.clearSelectedIndex()
+  placeStore.clearSelectedIndex()
   searchQuery.value = ''
-  placeSuggestions.clearItems()
+  placeStore.clearItems()
 }
 
 // Move up the dropdown list
 const handleArrowUp = () => {
-  placeSuggestions.decrementSelectedIndex()
+  placeStore.decrementSelectedIndex()
 }
 
 // Move down the dropdown list
 const handleArrowDown = () => {
-  placeSuggestions.incrementSelectedIndex()
+  placeStore.incrementSelectedIndex()
 }
 
 // Select a place from the dropdown by index
-const handleEnter = () => {
-  const selectedPlace = placeSuggestions.getItemByIndex()
+const handleSelect = () => {
+  const selectedPlace = placeStore.getItemByIndex()
   places.handlePlaceSelect(selectedPlace, selectedPlaces)
   emit('selectedPlacesUpdated', selectedPlaces.getItems())
   handleSearchReset()
@@ -138,20 +141,21 @@ const handleEnter = () => {
       :class="searchFieldClass"
       :search-query="searchQuery"
       :placeholder="placeholder"
-      :error="error.hasErrorMessage()"
-      :has-places="placeSuggestions.hasItems()"
+      :error="errorStore.hasErrorMessage()"
+      :has-places="placeStore.hasItems()"
       @input="handleInput"
       @change="handleChange"
     />
-    <ErrorMessage v-if="error.hasErrorMessage()" :error="error.getError()" />
+    <ErrorMessage v-if="errorStore.hasErrorMessage()" :error="errorStore.getError()" />
     <Dropdown
       v-if="canShowDropdown"
       :class="dropDownClass"
-      :places="placeSuggestions.getItems()"
-      :selectedPlaceIndex="placeSuggestions.getSelectedIndex()"
+      :places="placeStore.getItems()"
+      :selectedPlaceIndex="placeStore.getSelectedIndex()"
       @arrow-down="handleArrowDown"
       @arrow-up="handleArrowUp"
-      @enter="handleEnter"
+      @enter="handleSelect"
+      @select="handleSelect"
     />
     <SelectedPlaces
       v-if="canShowSelectedPlaces"

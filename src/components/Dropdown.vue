@@ -4,7 +4,7 @@
       v-for="(place, index) of places"
       :key="index"
       :class="{ selected: isSelected(index) }"
-      @click="emit('select', index)"
+      @click="handleClickSelect(index)"
     >
       <strong>{{ place.address?.name }}</strong>
       <p>
@@ -38,6 +38,10 @@ window.addEventListener('keydown', onKeyDown)
 
 const isSelected = (index) => {
   return props.selectedPlaceIndex === index
+}
+
+const handleClickSelect = (index) => {
+  emit('select', index)
 }
 </script>
 

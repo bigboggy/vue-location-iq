@@ -1,6 +1,6 @@
 import { Place } from '../interfaces/Place'
 
-export const usePlaces = (autoCompleteApi, placeSuggestions, error) => {
+export const usePlaces = (autoCompleteApi, placeStore, errorStore) => {
   const isPlaceDuplicate = (currentPlace, selectedPlaces) => {
     return selectedPlaces.items.value.some((selectedPlace) => selectedPlace.place_id === currentPlace.place_id)
   }
@@ -20,10 +20,10 @@ export const usePlaces = (autoCompleteApi, placeSuggestions, error) => {
 
     try {
       const suggestions = await autoCompleteApi.getGeoAutoComplete(value)
-      placeSuggestions.setItems(suggestions)
-      error.clearError()
+      placeStore.setItems(suggestions)
+      errorStore.clearError()
     } catch (e) {
-      error.setError(e.message)
+      errorStore.setError(e.message)
     }
   }
 
