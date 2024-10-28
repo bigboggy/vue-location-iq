@@ -17,18 +17,18 @@
       "require": "./dist/style.css"
     }
   },
-  "version": "0.0.56",
+  "version": "0.5",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "prettier": "^2.8.3",
-    "vue": "^3.2.45"
+    "prettier": "^2.8.8",
+    "vue": "^3.5.12"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.0.0",
-    "vite": "^4.0.0"
+    "@vitejs/plugin-vue": "^5.1.4",
+    "vite": "^5.4.10"
   }
 }
