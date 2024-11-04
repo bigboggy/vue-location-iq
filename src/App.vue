@@ -7,7 +7,7 @@ const searchPrompt = ref('')
 
 <template>
   <div class="demo-page">
-    <h1>VueLocationIQ</h1>
+    <h1>VueLocationIQ 1.0</h1>
     <VueLocationIQ :api-key="apiKey" v-model="searchPrompt" />
   </div>
 </template>
